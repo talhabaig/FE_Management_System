@@ -16,7 +16,6 @@ export const paths = {
 
 export type DashboardCardKey = 'total' | 'todo' | 'inProgress' | 'done' | 'highPriority' | 'overdue';
 
-/** Build a /tasks URL that mirrors the current dashboard filters plus a card focus. */
 export function tasksPathFromDashboard(
   values: {
     status: string;

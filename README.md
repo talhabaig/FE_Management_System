@@ -1,6 +1,6 @@
 # Task Management Frontend
 
-React + Vite UI for the role-based Task Management API. Users sign in, work in teams, manage tasks, leave comments, and receive assignment notifications. Permissions match the backend role matrix.
+React + Vite client for the role-based Task Management API. Covers auth, teams, tasks, comments, notifications, and the dashboard. Role checks follow the backend rules.
 
 ## Stack
 
@@ -16,7 +16,7 @@ React + Vite UI for the role-based Task Management API. Users sign in, work in t
 
 - Node.js 20+
 - npm
-- Running API (local or deployed). See the backend `BE_Management_System` README.
+- A running API (local or deployed). See the backend `BE_Management_System` README.
 
 ## Setup
 
@@ -25,19 +25,19 @@ npm install
 cp .env.example .env
 ```
 
-Edit `.env`:
+Set the API base URL in `.env`:
 
 ```env
 VITE_API_URL=http://localhost:3000
 ```
 
-For the hosted API:
+Hosted API example:
 
 ```env
 VITE_API_URL=https://be-management-system.vercel.app
 ```
 
-The backend `CORS_ORIGIN` must include this app’s origin (for example `http://localhost:5173` and your Vercel frontend URL). Production cookies use `Secure` + `SameSite=None`, so the API and UI both need HTTPS.
+The backend `CORS_ORIGIN` must include this app origin (for example `http://localhost:5173` and your deployed frontend URL). In production, cookies use `Secure` and `SameSite=None`, so both apps need HTTPS.
 
 ## Scripts
 
@@ -47,14 +47,14 @@ npm run build     # typecheck + production bundle
 npm run preview   # serve the build locally
 ```
 
-## Auth model (aligned with API docs)
+## Auth
 
-- Short-lived access token stays in memory (not `localStorage`).
+- Access token is kept in memory only (not `localStorage`).
 - Refresh token is an `HttpOnly` cookie on `/api/auth`.
-- A full page reload restores the session via `POST /api/auth/refresh`.
-- Registration always creates an active `USER`. Roles are changed by an administrator.
+- Reloading the page restores the session with `POST /api/auth/refresh`.
+- Register always creates an active `USER`. An admin changes roles later.
 
-## Roles (from API docs)
+## Roles
 
 | Action | ADMIN | MANAGER | USER |
 | --- | --- | --- | --- |
@@ -70,7 +70,7 @@ npm run preview   # serve the build locally
 
 ## Demo credentials (seed)
 
-Use only after the backend seed has run. Password for all seed users: `Password123!`
+Available after the backend seed. Password for all seed users: `Password123!`
 
 | Role | Email |
 | --- | --- |
@@ -81,22 +81,22 @@ Use only after the backend seed has run. Password for all seed users: `Password1
 
 Do not use this password in production.
 
-## Client demo checklist (~7 minutes)
+## Demo checklist
 
-1. **Admin** — sign in as `admin@example.com`.
-2. Open **Dashboard**. Click a summary card (for example High priority or To do) and confirm it opens **Tasks** with matching filters.
-3. Create a **Team**, add a member, create a **Task**, assign it to `user1@example.com`.
-4. Confirm the assignee gets a **Notification**.
-5. **Log out**, sign in as **Manager**. Update status / team membership on a managed team.
-6. **Log out**, sign in as **User**. Confirm only assigned tasks appear; add a **comment**; mark notifications read.
-7. **Reload the browser** while signed in — session should restore via the refresh cookie.
+1. Sign in as Admin (`admin@example.com`).
+2. Open Dashboard. Click a summary card and check that Tasks opens with the same filters.
+3. Create a Team, add a member, create a Task, assign it to `user1@example.com`.
+4. Confirm the assignee gets a Notification.
+5. Sign out, sign in as Manager. Update status or team membership on a managed team.
+6. Sign out, sign in as User. Confirm only assigned tasks show. Add a comment and mark notifications read.
+7. Reload the browser while signed in. Session should come back through the refresh cookie.
 
 ## Deploy (Vercel)
 
 1. Import this repo in Vercel (Vite preset).
 2. Set `VITE_API_URL` to the backend URL.
 3. On the backend, add this frontend origin to `CORS_ORIGIN`.
-4. Deploy and walk the checklist above against production.
+4. Deploy and run the demo checklist against production.
 
 ## Project layout
 
