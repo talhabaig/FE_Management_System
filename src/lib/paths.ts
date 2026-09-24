@@ -1,7 +1,7 @@
 export const paths = {
   login: '/login',
   register: '/register',
-  dashboard: '/',
+  dashboard: '/dashboard',
   tasks: '/tasks',
   newTask: '/tasks/new',
   task: (id: string) => `/tasks/${id}`,

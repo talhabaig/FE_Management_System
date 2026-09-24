@@ -1,5 +1,5 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { ErrorState, LoadingState } from '../components/layout/AsyncState';
+import { LoadingState } from '../components/layout/AsyncState';
 import { useMe } from '../hooks/useAuth';
 import { paths } from '../lib/paths';
 import type { Role } from '../types/api';
@@ -15,17 +15,7 @@ export function SessionGate() {
     );
   }
 
-  if (me.isError) {
-    return (
-      <div className="mx-auto flex min-h-screen max-w-lg flex-col justify-center px-6">
-        <h1 className="font-display text-4xl">Cannot restore the session</h1>
-        <div className="mt-6">
-          <ErrorState error={me.error} onRetry={() => void me.refetch()} />
-        </div>
-      </div>
-    );
-  }
-
+  // Restore failures (including refresh/me 429) must not look like login lockout — continue to Login.
   return <Outlet />;
 }
 

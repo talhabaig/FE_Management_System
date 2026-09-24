@@ -20,6 +20,7 @@ export async function restoreSession(): Promise<User | null> {
       await refreshAccessToken();
     } catch (error) {
       setAccessToken(null);
+      // 401/403 = no session. Other errors (including 429) propagate to SessionGate.
       if (isApiRequestError(error) && (error.status === 401 || error.status === 403)) {
         return null;
       }

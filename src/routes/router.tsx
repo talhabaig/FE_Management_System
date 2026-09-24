@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { AppShell } from '../components/layout/AppShell';
 import { DashboardPage } from '../pages/DashboardPage';
 import { LoginPage } from '../pages/LoginPage';
@@ -33,7 +33,8 @@ export const router = createBrowserRouter([
           {
             element: <AppShell />,
             children: [
-              { path: '/', element: <DashboardPage /> },
+              { path: '/', element: <Navigate to="/dashboard" replace /> },
+              { path: '/dashboard', element: <DashboardPage /> },
               { path: '/tasks', element: <TasksPage /> },
               {
                 element: <RequireRole roles={['ADMIN', 'MANAGER']} />,

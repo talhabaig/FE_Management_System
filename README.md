@@ -25,19 +25,19 @@ npm install
 cp .env.example .env
 ```
 
-Set the API base URL in `.env`:
-
-```env
-VITE_API_URL=http://localhost:3000
-```
-
-Hosted API example:
+Set the API proxy target in `.env` (used by Vite in development):
 
 ```env
 VITE_API_URL=https://be-management-system.vercel.app
 ```
 
-The backend `CORS_ORIGIN` must include this app origin (for example `http://localhost:5173` and your deployed frontend URL). In production, cookies use `Secure` and `SameSite=None`, so both apps need HTTPS.
+Or a local API:
+
+```env
+VITE_API_URL=http://localhost:3000
+```
+
+The browser always calls same-origin `/api`. Vite and Vercel proxy those requests to the backend so the refresh cookie stays first-party and survives a page reload.
 
 ## Scripts
 
@@ -94,9 +94,15 @@ Do not use this password in production.
 ## Deploy (Vercel)
 
 1. Import this repo in Vercel (Vite preset).
-2. Set `VITE_API_URL` to the backend URL.
-3. On the backend, add this frontend origin to `CORS_ORIGIN`.
+2. Leave `VITE_API_URL` **empty / unset** on Vercel. The app calls `/api` on the same origin; `vercel.json` proxies those requests to `https://be-management-system.vercel.app`.
+3. On the backend, you can still list this frontend origin in `CORS_ORIGIN` if you call the API directly elsewhere.
 4. Deploy and run the demo checklist against production.
+
+`vercel.json` also rewrites non-API routes to `index.html` so paths like `/login` work on refresh.
+
+### Why same-origin `/api`?
+
+Access tokens are memory-only. After a refresh, the session comes back through the `refreshToken` HttpOnly cookie. If the UI and API are on different Vercel hosts, that cookie is third-party and browsers often drop it — so reload sends you to login. Proxying `/api` keeps the cookie first-party.
 
 ## Project layout
 
