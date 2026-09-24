@@ -19,6 +19,31 @@ import { readTaskFilters, replaceParam } from '../lib/listFilters';
 import { OPTION_PAGE_SIZE } from '../lib/params';
 import { paths } from '../lib/paths';
 import { canCreateTask, canViewUsers } from '../lib/permissions';
+import type { Task } from '../types/api';
+
+function TaskCard({ task, onOpen }: { task: Task; onOpen: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="w-full rounded-2xl border border-sand bg-card p-4 text-left shadow-card transition hover:border-moss/35"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <p className="font-semibold text-ink">{task.title}</p>
+        <Badge variant={statusBadgeVariant(task.status)}>{taskStatusLabel(task.status)}</Badge>
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Badge variant={priorityBadgeVariant(task.priority)}>{taskPriorityLabel(task.priority)}</Badge>
+        <span className="text-sm text-ink/65">{task.team.name}</span>
+      </div>
+      <p className="mt-2 text-sm text-ink/70">
+        {task.assignedTo?.name ?? 'Unassigned'}
+        {task.deadline ? ` · ${formatDateTime(task.deadline)}` : ''}
+        {isOverdue(task.deadline, task.status) ? ' · Overdue' : ''}
+      </p>
+    </button>
+  );
+}
 
 export function TasksPage() {
   useDocumentTitle('Tasks');
@@ -81,43 +106,50 @@ export function TasksPage() {
         />
       ) : null}
       {tasks.data && tasks.data.data.length > 0 ? (
-        <div className="overflow-x-auto rounded-2xl border border-sand bg-card shadow-card">
-          <table className="min-w-full text-left text-sm">
-            <thead className="bg-sand/70 text-ink/70">
-              <tr>
-                <th className="px-4 py-3 font-semibold">Title</th>
-                <th className="px-4 py-3 font-semibold">Status</th>
-                <th className="px-4 py-3 font-semibold">Priority</th>
-                <th className="px-4 py-3 font-semibold">Team</th>
-                <th className="px-4 py-3 font-semibold">Assignee</th>
-                <th className="px-4 py-3 font-semibold">Deadline</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-sand">
-              {tasks.data.data.map((task) => (
-                <tr key={task.id}>
-                  <td className="px-4 py-3">
-                    <Button type="button" variant="ghost" onClick={() => navigate(paths.task(task.id))}>
-                      {task.title}
-                    </Button>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge variant={statusBadgeVariant(task.status)}>{taskStatusLabel(task.status)}</Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge variant={priorityBadgeVariant(task.priority)}>{taskPriorityLabel(task.priority)}</Badge>
-                  </td>
-                  <td className="px-4 py-3">{task.team.name}</td>
-                  <td className="px-4 py-3">{task.assignedTo?.name ?? 'Unassigned'}</td>
-                  <td className="px-4 py-3">
-                    {formatDateTime(task.deadline)}
-                    {isOverdue(task.deadline, task.status) ? ' · Overdue' : ''}
-                  </td>
+        <>
+          <div className="space-y-3 md:hidden">
+            {tasks.data.data.map((task) => (
+              <TaskCard key={task.id} task={task} onOpen={() => navigate(paths.task(task.id))} />
+            ))}
+          </div>
+          <div className="hidden overflow-x-auto rounded-2xl border border-sand bg-card shadow-card md:block">
+            <table className="min-w-full text-left text-sm">
+              <thead className="bg-sand/70 text-ink/70">
+                <tr>
+                  <th className="px-4 py-3 font-semibold">Title</th>
+                  <th className="px-4 py-3 font-semibold">Status</th>
+                  <th className="px-4 py-3 font-semibold">Priority</th>
+                  <th className="px-4 py-3 font-semibold">Team</th>
+                  <th className="px-4 py-3 font-semibold">Assignee</th>
+                  <th className="px-4 py-3 font-semibold">Deadline</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-sand">
+                {tasks.data.data.map((task) => (
+                  <tr key={task.id}>
+                    <td className="px-4 py-3">
+                      <Button type="button" variant="ghost" onClick={() => navigate(paths.task(task.id))}>
+                        {task.title}
+                      </Button>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Badge variant={statusBadgeVariant(task.status)}>{taskStatusLabel(task.status)}</Badge>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Badge variant={priorityBadgeVariant(task.priority)}>{taskPriorityLabel(task.priority)}</Badge>
+                    </td>
+                    <td className="px-4 py-3">{task.team.name}</td>
+                    <td className="px-4 py-3">{task.assignedTo?.name ?? 'Unassigned'}</td>
+                    <td className="px-4 py-3">
+                      {formatDateTime(task.deadline)}
+                      {isOverdue(task.deadline, task.status) ? ' · Overdue' : ''}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       ) : null}
       {tasks.data && tasks.data.pagination.totalPages > 1 ? (
         <Pagination

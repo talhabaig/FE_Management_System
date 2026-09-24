@@ -14,6 +14,86 @@ export const paths = {
   profile: '/profile',
 } as const;
 
+export type DashboardCardKey = 'total' | 'todo' | 'inProgress' | 'done' | 'highPriority' | 'overdue';
+
+export function tasksPathFromDashboard(
+  values: {
+    status: string;
+    priority: string;
+    teamId: string;
+    assignedToId: string;
+    deadlineFrom: string;
+    deadlineTo: string;
+  },
+  focus: DashboardCardKey,
+): string {
+  const params = new URLSearchParams();
+  if (values.teamId) {
+    params.set('teamId', values.teamId);
+  }
+  if (values.assignedToId) {
+    params.set('assignedToId', values.assignedToId);
+  }
+  if (values.deadlineFrom) {
+    params.set('deadlineFrom', values.deadlineFrom);
+  }
+  if (values.deadlineTo) {
+    params.set('deadlineTo', values.deadlineTo);
+  }
+
+  switch (focus) {
+    case 'todo':
+      params.set('status', 'TODO');
+      if (values.priority) {
+        params.set('priority', values.priority);
+      }
+      break;
+    case 'inProgress':
+      params.set('status', 'IN_PROGRESS');
+      if (values.priority) {
+        params.set('priority', values.priority);
+      }
+      break;
+    case 'done':
+      params.set('status', 'DONE');
+      if (values.priority) {
+        params.set('priority', values.priority);
+      }
+      break;
+    case 'highPriority':
+      params.set('priority', 'HIGH');
+      if (values.status) {
+        params.set('status', values.status);
+      }
+      break;
+    case 'overdue': {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      params.set('deadlineTo', `${yyyy}-${mm}-${dd}`);
+      params.set('sortBy', 'deadline');
+      params.set('sortOrder', 'asc');
+      if (values.priority) {
+        params.set('priority', values.priority);
+      }
+      break;
+    }
+    case 'total':
+    default:
+      if (values.status) {
+        params.set('status', values.status);
+      }
+      if (values.priority) {
+        params.set('priority', values.priority);
+      }
+      break;
+  }
+
+  const query = params.toString();
+  return query ? `${paths.tasks}?${query}` : paths.tasks;
+}
+
 export function encodeId(id: string): string {
   return encodeURIComponent(id);
 }

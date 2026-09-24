@@ -1,5 +1,6 @@
 import { ErrorState, LoadingState } from '../components/layout/AsyncState';
 import { PageHeader } from '../components/layout/PageHeader';
+import { useToast } from '../components/ui/Toast';
 import { ProfileForm } from '../components/users/ProfileForm';
 import { useMe } from '../hooks/useAuth';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -9,6 +10,7 @@ import { getErrorMessage } from '../lib/api';
 export function ProfilePage() {
   useDocumentTitle('Profile');
   const me = useMe();
+  const toast = useToast();
   const updateUser = useUpdateUser(me.data?.id ?? '');
 
   if (me.isPending || !me.data) {
@@ -26,7 +28,15 @@ export function ProfilePage() {
         isSubmitting={updateUser.isPending}
         formError={updateUser.isError ? getErrorMessage(updateUser.error) : undefined}
         saved={updateUser.isSuccess}
-        onSubmit={(name) => updateUser.mutate({ name })}
+        onSubmit={(name) =>
+          updateUser.mutate(
+            { name },
+            {
+              onSuccess: () => toast.success('Name saved.'),
+              onError: (error) => toast.error(getErrorMessage(error)),
+            },
+          )
+        }
       />
     </div>
   );

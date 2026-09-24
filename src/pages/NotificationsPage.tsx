@@ -7,6 +7,7 @@ import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Pagination } from '../components/ui/Pagination';
+import { useToast } from '../components/ui/Toast';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useMarkAllNotificationsRead, useMarkNotificationRead, useNotifications } from '../hooks/useNotifications';
 import { formatDateTime } from '../lib/dates';
@@ -19,6 +20,7 @@ import { paths } from '../lib/paths';
 export function NotificationsPage() {
   useDocumentTitle('Notifications');
   const navigate = useNavigate();
+  const toast = useToast();
   const [params, setParams] = useSearchParams();
   const filters = useMemo(
     () => ({ page: readPositiveInt(params.get('page'), 1), limit: PAGE_SIZE }),
@@ -35,13 +37,21 @@ export function NotificationsPage() {
         title="Notifications"
         description="Assignments and status changes for your account."
         action={
-          <Button type="button" variant="secondary" isLoading={markAll.isPending} onClick={() => markAll.mutate()}>
+          <Button
+            type="button"
+            variant="secondary"
+            isLoading={markAll.isPending}
+            onClick={() =>
+              markAll.mutate(undefined, {
+                onSuccess: (result) => toast.success(`Marked ${result.updated} as read.`),
+                onError: (error) => toast.error(getErrorMessage(error)),
+              })
+            }
+          >
             Mark all read
           </Button>
         }
       />
-      {markAll.isError ? <Alert tone="error">{getErrorMessage(markAll.error)}</Alert> : null}
-      {markAll.isSuccess ? <Alert tone="success">Marked {markAll.data.updated} as read.</Alert> : null}
       {markRead.isError ? <Alert tone="error">{getErrorMessage(markRead.error)}</Alert> : null}
       {notifications.isPending ? <LoadingState label="Loading notifications" /> : null}
       {notifications.isError ? (
@@ -71,7 +81,10 @@ export function NotificationsPage() {
                     isLoading={markRead.isPending && pendingId === notification.id}
                     onClick={() => {
                       setPendingId(notification.id);
-                      markRead.mutate(notification.id);
+                      markRead.mutate(notification.id, {
+                        onSuccess: () => toast.success('Notification marked read.'),
+                        onError: (error) => toast.error(getErrorMessage(error)),
+                      });
                     }}
                   >
                     Mark read

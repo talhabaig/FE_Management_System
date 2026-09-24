@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { CommentForm } from '../components/comments/CommentForm';
 import { CommentList } from '../components/comments/CommentList';
@@ -11,6 +11,7 @@ import { Alert } from '../components/ui/Alert';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
+import { useToast } from '../components/ui/Toast';
 import { useMe } from '../hooks/useAuth';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useDeleteTask, useTask, useUpdateTask } from '../hooks/useTasks';
@@ -70,10 +71,17 @@ export function TaskDetailPage() {
   const [editing, setEditing] = useState(false);
   const [formMessage, setFormMessage] = useState<string | null>(null);
   const notice = readNotice(location.state);
+  const toast = useToast();
   const actor = me.data;
   const current = task.data;
   const manageable = actor && current ? canManageTask(actor, current) : false;
   const statusAllowed = actor && current ? canUpdateTaskStatus(actor, current) : false;
+
+  useEffect(() => {
+    if (notice) {
+      toast.success(notice);
+    }
+  }, [notice, toast]);
 
   if (task.isPending) {
     return <LoadingState label="Loading task" />;
@@ -102,7 +110,6 @@ export function TaskDetailPage() {
           ) : null
         }
       />
-      {notice ? <Alert tone="success">{notice}</Alert> : null}
       <dl className="grid gap-4 rounded-2xl border border-sand bg-card p-5 shadow-card sm:grid-cols-2">
         <div>
           <dt className="text-sm font-semibold text-ink/60">Status</dt>
