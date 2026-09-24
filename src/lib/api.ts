@@ -5,7 +5,13 @@ import axios, {
 } from 'axios';
 import type { ApiErrorDetail, ApiErrorResponse, Paginated, SuccessResponse } from '../types/api';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+function resolveApiUrl(): string {
+  // Always call same-origin `/api` so the refresh cookie stays first-party.
+  // Vite (dev) and vercel.json (prod) proxy `/api` to the backend.
+  return '';
+}
+
+const API_URL = resolveApiUrl();
 
 /**
  * Access token for the current tab. It is intentionally not persisted.
@@ -36,18 +42,30 @@ export class ApiRequestError extends Error {
   readonly status: number;
   readonly code: string;
   readonly details?: ApiErrorDetail[];
+  readonly retryAfterSeconds?: number;
 
-  constructor(status: number, code: string, message: string, details?: ApiErrorDetail[]) {
+  constructor(
+    status: number,
+    code: string,
+    message: string,
+    details?: ApiErrorDetail[],
+    retryAfterSeconds?: number,
+  ) {
     super(message);
     this.name = 'ApiRequestError';
     this.status = status;
     this.code = code;
     this.details = details;
+    this.retryAfterSeconds = retryAfterSeconds;
   }
 }
 
 export function isApiRequestError(error: unknown): error is ApiRequestError {
   return error instanceof ApiRequestError;
+}
+
+export function isLoginLockedError(error: unknown): error is ApiRequestError {
+  return isApiRequestError(error) && (error.code === 'LOGIN_LOCKED' || error.status === 429);
 }
 
 export const api = axios.create({
@@ -84,6 +102,32 @@ function readDetails(details: unknown): ApiErrorDetail[] | undefined {
   return parsed.length > 0 ? parsed : undefined;
 }
 
+function readRetryAfterSeconds(details: unknown, headers: unknown): number | undefined {
+  if (isRecord(details) && typeof details.retryAfterSeconds === 'number' && Number.isFinite(details.retryAfterSeconds)) {
+    return Math.max(0, Math.floor(details.retryAfterSeconds));
+  }
+
+  if (!headers || typeof headers !== 'object') {
+    return undefined;
+  }
+
+  const headerMap = headers as { get?: (name: string) => string | null | undefined; [key: string]: unknown };
+  let raw: unknown = typeof headerMap.get === 'function' ? headerMap.get('retry-after') : undefined;
+  if (raw == null) {
+    raw = headerMap['retry-after'] ?? headerMap['Retry-After'];
+  }
+  if (Array.isArray(raw)) {
+    raw = raw[0];
+  }
+  if (typeof raw === 'number' && Number.isFinite(raw)) {
+    return Math.max(0, Math.floor(raw));
+  }
+  if (typeof raw === 'string' && /^\d+$/.test(raw.trim())) {
+    return Number(raw.trim());
+  }
+  return undefined;
+}
+
 function isErrorResponse(value: unknown): value is ApiErrorResponse {
   if (!isRecord(value) || value.success !== false || !isRecord(value.error)) {
     return false;
@@ -101,7 +145,13 @@ export function toApiError(error: unknown): ApiRequestError {
     const status = axiosError.response?.status ?? 0;
     const body = axiosError.response?.data;
     if (isErrorResponse(body)) {
-      return new ApiRequestError(status, body.error.code, body.error.message, readDetails(body.error.details));
+      return new ApiRequestError(
+        status,
+        body.error.code,
+        body.error.message,
+        readDetails(body.error.details),
+        readRetryAfterSeconds(body.error.details, axiosError.response?.headers),
+      );
     }
     if (status === 0) {
       return new ApiRequestError(0, 'NETWORK_ERROR', 'Cannot reach the server. Check your connection and try again.');
