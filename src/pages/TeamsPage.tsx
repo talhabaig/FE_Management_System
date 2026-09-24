@@ -14,6 +14,21 @@ import { formatDateTime } from '../lib/dates';
 import { readTeamFilters, replaceParam } from '../lib/listFilters';
 import { paths } from '../lib/paths';
 import { canCreateTeam } from '../lib/permissions';
+import type { Team } from '../types/api';
+
+function TeamCard({ team, onOpen }: { team: Team; onOpen: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="w-full rounded-2xl border border-sand bg-card p-4 text-left shadow-card transition hover:border-moss/35"
+    >
+      <p className="font-semibold text-ink">{team.name}</p>
+      <p className="mt-2 text-sm text-ink/70">Manager: {team.manager.name}</p>
+      <p className="mt-1 text-sm text-ink/55">Created {formatDateTime(team.createdAt)}</p>
+    </button>
+  );
+}
 
 export function TeamsPage() {
   useDocumentTitle('Teams');
@@ -58,30 +73,37 @@ export function TeamsPage() {
         <EmptyState title="No teams" description="No teams match this search." />
       ) : null}
       {teams.data && teams.data.data.length > 0 ? (
-        <div className="overflow-x-auto rounded-2xl border border-sand bg-card shadow-card">
-          <table className="min-w-full text-left text-sm">
-            <thead className="bg-sand/70 text-ink/70">
-              <tr>
-                <th className="px-4 py-3 font-semibold">Name</th>
-                <th className="px-4 py-3 font-semibold">Manager</th>
-                <th className="px-4 py-3 font-semibold">Created</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-sand">
-              {teams.data.data.map((team) => (
-                <tr key={team.id}>
-                  <td className="px-4 py-3">
-                    <Button type="button" variant="ghost" onClick={() => navigate(paths.team(team.id))}>
-                      {team.name}
-                    </Button>
-                  </td>
-                  <td className="px-4 py-3">{team.manager.name}</td>
-                  <td className="px-4 py-3">{formatDateTime(team.createdAt)}</td>
+        <>
+          <div className="space-y-3 md:hidden">
+            {teams.data.data.map((team) => (
+              <TeamCard key={team.id} team={team} onOpen={() => navigate(paths.team(team.id))} />
+            ))}
+          </div>
+          <div className="hidden overflow-x-auto rounded-2xl border border-sand bg-card shadow-card md:block">
+            <table className="min-w-full text-left text-sm">
+              <thead className="bg-sand/70 text-ink/70">
+                <tr>
+                  <th className="px-4 py-3 font-semibold">Name</th>
+                  <th className="px-4 py-3 font-semibold">Manager</th>
+                  <th className="px-4 py-3 font-semibold">Created</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-sand">
+                {teams.data.data.map((team) => (
+                  <tr key={team.id}>
+                    <td className="px-4 py-3">
+                      <Button type="button" variant="ghost" onClick={() => navigate(paths.team(team.id))}>
+                        {team.name}
+                      </Button>
+                    </td>
+                    <td className="px-4 py-3">{team.manager.name}</td>
+                    <td className="px-4 py-3">{formatDateTime(team.createdAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       ) : null}
       {teams.data && teams.data.pagination.totalPages > 1 ? (
         <Pagination
