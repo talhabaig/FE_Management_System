@@ -122,3 +122,7 @@ export function readNotice(state: unknown): string | null {
 export function readRegistered(state: unknown): boolean {
   return typeof state === 'object' && state !== null && 'registered' in state && state.registered === true;
 }
+
+export function readCreate(state: unknown): boolean {
+  return typeof state === 'object' && state !== null && 'create' in state && state.create === true;
+}

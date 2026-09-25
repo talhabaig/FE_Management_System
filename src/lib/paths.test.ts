@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { paths, readNotice, readRedirect, readRegistered, tasksPathFromDashboard } from './paths';
+import { paths, readCreate, readNotice, readRedirect, readRegistered, tasksPathFromDashboard } from './paths';
 
 describe('paths', () => {
   it('builds resource paths from ids', () => {
@@ -75,5 +75,21 @@ describe('paths', () => {
     expect(emptyNotice).toBeNull();
     expect(registered).toBe(true);
     expect(notRegistered).toBe(false);
+  });
+
+  it('reads the create flag from router state', () => {
+    // Arrange
+    const createState = { create: true };
+    const otherState = { create: false };
+
+    // Act
+    const shouldCreate = readCreate(createState);
+    const shouldNotCreate = readCreate(otherState);
+    const missing = readCreate(undefined);
+
+    // Assert
+    expect(shouldCreate).toBe(true);
+    expect(shouldNotCreate).toBe(false);
+    expect(missing).toBe(false);
   });
 });
