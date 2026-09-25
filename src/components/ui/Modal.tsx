@@ -84,44 +84,50 @@ export function Modal({ open, title, description, children, onClose, footer, siz
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50">
+      <div className="absolute inset-0 bg-ink/40" />
       <div
-        className="absolute inset-0 bg-ink/50"
+        className="relative flex h-full items-center justify-center p-4"
         onMouseDown={(event) => {
           if (event.target === event.currentTarget) {
             onClose();
           }
         }}
-      />
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        aria-describedby={description ? descriptionId : undefined}
-        tabIndex={-1}
-        className={[
-          'relative max-h-[85vh] w-full overflow-y-auto rounded-2xl border border-sand bg-card p-6 shadow-card',
-          size === 'xl' ? 'max-w-2xl' : 'max-w-lg',
-        ].join(' ')}
       >
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 id={titleId} className="font-display text-2xl text-ink">
-              {title}
-            </h2>
-            {description ? (
-              <p id={descriptionId} className="mt-2 text-sm text-ink/70">
-                {description}
-              </p>
-            ) : null}
+        <div
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={titleId}
+          aria-describedby={description ? descriptionId : undefined}
+          tabIndex={-1}
+          className={[
+            'flex max-h-[85vh] w-full flex-col overflow-hidden rounded-2xl border border-sand bg-card',
+            size === 'xl' ? 'max-w-2xl' : 'max-w-lg',
+          ].join(' ')}
+        >
+          <div className="flex shrink-0 items-start justify-between gap-4 px-6 pt-6">
+            <div>
+              <h2 id={titleId} className="font-display text-2xl text-ink">
+                {title}
+              </h2>
+              {description ? (
+                <p id={descriptionId} className="mt-2 text-sm text-ink/70">
+                  {description}
+                </p>
+              ) : null}
+            </div>
+            <Button type="button" variant="ghost" onClick={onClose} aria-label="Close dialog">
+              Close
+            </Button>
           </div>
-          <Button type="button" variant="ghost" onClick={onClose} aria-label="Close dialog">
-            Close
-          </Button>
+          {children ? <div className="min-h-0 overflow-y-auto px-6 py-5">{children}</div> : null}
+          {footer ? (
+            <div className={['flex shrink-0 flex-wrap justify-end gap-2 px-6 pb-6', children ? '' : 'pt-5'].join(' ')}>
+              {footer}
+            </div>
+          ) : null}
         </div>
-        {children ? <div className="mt-5">{children}</div> : null}
-        {footer ? <div className="mt-6 flex flex-wrap justify-end gap-2">{footer}</div> : null}
       </div>
     </div>,
     document.body,
