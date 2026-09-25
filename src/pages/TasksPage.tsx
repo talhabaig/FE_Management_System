@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { ErrorState, LoadingState } from '../components/layout/AsyncState';
 import { PageHeader } from '../components/layout/PageHeader';
+import { CreateTaskModal } from '../components/tasks/CreateTaskModal';
 import { TaskFilters } from '../components/tasks/TaskFilters';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
@@ -17,7 +18,7 @@ import { formatDateTime, isOverdue } from '../lib/dates';
 import { priorityBadgeVariant, statusBadgeVariant, taskPriorityLabel, taskStatusLabel } from '../lib/labels';
 import { readTaskFilters, replaceParam } from '../lib/listFilters';
 import { OPTION_PAGE_SIZE } from '../lib/params';
-import { paths } from '../lib/paths';
+import { paths, readCreate } from '../lib/paths';
 import { canCreateTask, canViewUsers } from '../lib/permissions';
 import type { Task } from '../types/api';
 
@@ -48,7 +49,9 @@ function TaskCard({ task, onOpen }: { task: Task; onOpen: () => void }) {
 export function TasksPage() {
   useDocumentTitle('Tasks');
   const navigate = useNavigate();
+  const location = useLocation();
   const me = useMe();
+  const [createOpen, setCreateOpen] = useState(false);
   const [params, setParams] = useSearchParams();
   const state = useMemo(() => readTaskFilters(params), [params]);
   const search = useSearchDraft(params.get('search') ?? '', setParams);
@@ -57,6 +60,14 @@ export function TasksPage() {
   const showAssignee = canViewUsers(me.data?.role);
   const users = useUsers({ page: 1, limit: OPTION_PAGE_SIZE }, showAssignee);
   const allowCreate = canCreateTask(me.data?.role);
+
+  useEffect(() => {
+    if (!allowCreate || !readCreate(location.state)) {
+      return;
+    }
+    setCreateOpen(true);
+    navigate(`${location.pathname}${location.search}`, { replace: true, state: {} });
+  }, [allowCreate, location.pathname, location.search, location.state, navigate]);
 
   return (
     <div className="space-y-6">
@@ -67,7 +78,7 @@ export function TasksPage() {
         }
         action={
           allowCreate ? (
-            <Button type="button" onClick={() => navigate(paths.newTask)}>
+            <Button type="button" onClick={() => setCreateOpen(true)}>
               New task
             </Button>
           ) : null
@@ -98,7 +109,7 @@ export function TasksPage() {
           }
           action={
             allowCreate ? (
-              <Button type="button" onClick={() => navigate(paths.newTask)}>
+              <Button type="button" onClick={() => setCreateOpen(true)}>
                 New task
               </Button>
             ) : undefined
@@ -157,6 +168,7 @@ export function TasksPage() {
           onPageChange={(page) => setParams((current) => replaceParam(current, 'page', String(page), false))}
         />
       ) : null}
+      {allowCreate ? <CreateTaskModal open={createOpen} onClose={() => setCreateOpen(false)} /> : null}
     </div>
   );
 }

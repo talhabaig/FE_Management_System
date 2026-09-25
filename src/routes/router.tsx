@@ -6,10 +6,8 @@ import { NotFoundPage } from '../pages/NotFoundPage';
 import { NotificationsPage } from '../pages/NotificationsPage';
 import { ProfilePage } from '../pages/ProfilePage';
 import { RegisterPage } from '../pages/RegisterPage';
-import { TaskCreatePage } from '../pages/TaskCreatePage';
 import { TaskDetailPage } from '../pages/TaskDetailPage';
 import { TasksPage } from '../pages/TasksPage';
-import { TeamCreatePage } from '../pages/TeamCreatePage';
 import { TeamDetailPage } from '../pages/TeamDetailPage';
 import { TeamsPage } from '../pages/TeamsPage';
 import { UserEditPage } from '../pages/UserEditPage';
@@ -38,13 +36,13 @@ export const router = createBrowserRouter([
               { path: '/tasks', element: <TasksPage /> },
               {
                 element: <RequireRole roles={['ADMIN', 'MANAGER']} />,
-                children: [{ path: '/tasks/new', element: <TaskCreatePage /> }],
+                children: [{ path: '/tasks/new', element: <Navigate to="/tasks" replace state={{ create: true }} /> }],
               },
               { path: '/tasks/:taskId', element: <TaskDetailPage /> },
               { path: '/teams', element: <TeamsPage /> },
               {
                 element: <RequireRole roles={['ADMIN']} />,
-                children: [{ path: '/teams/new', element: <TeamCreatePage /> }],
+                children: [{ path: '/teams/new', element: <Navigate to="/teams" replace state={{ create: true }} /> }],
               },
               { path: '/teams/:teamId', element: <TeamDetailPage /> },
               {

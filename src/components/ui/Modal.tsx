@@ -9,6 +9,7 @@ export interface ModalProps {
   children?: ReactNode;
   onClose: () => void;
   footer?: ReactNode;
+  size?: 'md' | 'xl';
 }
 
 function focusableElements(container: HTMLElement): HTMLElement[] {
@@ -19,7 +20,7 @@ function focusableElements(container: HTMLElement): HTMLElement[] {
   ).filter((element) => !element.hasAttribute('disabled'));
 }
 
-export function Modal({ open, title, description, children, onClose, footer }: ModalProps) {
+export function Modal({ open, title, description, children, onClose, footer, size = 'md' }: ModalProps) {
   const titleId = useId();
   const descriptionId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -99,7 +100,10 @@ export function Modal({ open, title, description, children, onClose, footer }: M
         aria-labelledby={titleId}
         aria-describedby={description ? descriptionId : undefined}
         tabIndex={-1}
-        className="relative max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-sand bg-card p-6 shadow-card"
+        className={[
+          'relative max-h-[85vh] w-full overflow-y-auto rounded-2xl border border-sand bg-card p-6 shadow-card',
+          size === 'xl' ? 'max-w-2xl' : 'max-w-lg',
+        ].join(' ')}
       >
         <div className="flex items-start justify-between gap-4">
           <div>

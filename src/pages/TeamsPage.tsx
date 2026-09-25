@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { ErrorState, LoadingState } from '../components/layout/AsyncState';
 import { PageHeader } from '../components/layout/PageHeader';
+import { CreateTeamModal } from '../components/teams/CreateTeamModal';
 import { Button } from '../components/ui/Button';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Pagination } from '../components/ui/Pagination';
@@ -12,7 +13,7 @@ import { useSearchDraft } from '../hooks/useSearchDraft';
 import { useTeams } from '../hooks/useTeams';
 import { formatDateTime } from '../lib/dates';
 import { readTeamFilters, replaceParam } from '../lib/listFilters';
-import { paths } from '../lib/paths';
+import { paths, readCreate } from '../lib/paths';
 import { canCreateTeam } from '../lib/permissions';
 import type { Team } from '../types/api';
 
@@ -33,12 +34,22 @@ function TeamCard({ team, onOpen }: { team: Team; onOpen: () => void }) {
 export function TeamsPage() {
   useDocumentTitle('Teams');
   const navigate = useNavigate();
+  const location = useLocation();
   const me = useMe();
+  const [createOpen, setCreateOpen] = useState(false);
   const [params, setParams] = useSearchParams();
   const filters = useMemo(() => readTeamFilters(params), [params]);
   const search = useSearchDraft(params.get('search') ?? '', setParams);
   const teams = useTeams(filters);
   const allowCreate = canCreateTeam(me.data?.role);
+
+  useEffect(() => {
+    if (!allowCreate || !readCreate(location.state)) {
+      return;
+    }
+    setCreateOpen(true);
+    navigate(`${location.pathname}${location.search}`, { replace: true, state: {} });
+  }, [allowCreate, location.pathname, location.search, location.state, navigate]);
 
   return (
     <div className="space-y-6">
@@ -51,7 +62,7 @@ export function TeamsPage() {
         }
         action={
           allowCreate ? (
-            <Button type="button" onClick={() => navigate(paths.newTeam)}>
+            <Button type="button" onClick={() => setCreateOpen(true)}>
               New team
             </Button>
           ) : null
@@ -70,7 +81,17 @@ export function TeamsPage() {
       {teams.isPending ? <LoadingState label="Loading teams" /> : null}
       {teams.isError ? <ErrorState error={teams.error} onRetry={() => void teams.refetch()} /> : null}
       {teams.data && teams.data.data.length === 0 ? (
-        <EmptyState title="No teams" description="No teams match this search." />
+        <EmptyState
+          title="No teams"
+          description="No teams match this search."
+          action={
+            allowCreate ? (
+              <Button type="button" onClick={() => setCreateOpen(true)}>
+                New team
+              </Button>
+            ) : undefined
+          }
+        />
       ) : null}
       {teams.data && teams.data.data.length > 0 ? (
         <>
@@ -111,6 +132,7 @@ export function TeamsPage() {
           onPageChange={(page) => setParams((current) => replaceParam(current, 'page', String(page), false))}
         />
       ) : null}
+      {allowCreate ? <CreateTeamModal open={createOpen} onClose={() => setCreateOpen(false)} /> : null}
     </div>
   );
 }
