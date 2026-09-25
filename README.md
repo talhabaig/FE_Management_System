@@ -42,9 +42,11 @@ The browser always calls same-origin `/api`. Vite and Vercel proxy those request
 ## Scripts
 
 ```bash
-npm run dev       # http://localhost:5173
-npm run build     # typecheck + production bundle
-npm run preview   # serve the build locally
+npm run dev         # http://localhost:5173
+npm run build       # typecheck + production bundle
+npm run preview     # serve the build locally
+npm test            # unit tests (AAA pattern, Vitest)
+npm run test:watch  # re-run tests on change
 ```
 
 ## Auth
