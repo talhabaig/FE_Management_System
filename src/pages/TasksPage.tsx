@@ -151,12 +151,9 @@ export function TasksPage() {
           </div>
         </>
       ) : null}
-      {tasks.data && tasks.data.pagination.totalPages > 1 ? (
+      {tasks.data ? (
         <Pagination
-          page={tasks.data.pagination.page}
-          totalPages={tasks.data.pagination.totalPages}
-          hasNextPage={tasks.data.pagination.hasNextPage}
-          hasPreviousPage={tasks.data.pagination.hasPreviousPage}
+          pagination={tasks.data.pagination}
           onPageChange={(page) => setParams((current) => replaceParam(current, 'page', String(page), false))}
         />
       ) : null}

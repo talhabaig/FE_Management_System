@@ -105,12 +105,9 @@ export function TeamsPage() {
           </div>
         </>
       ) : null}
-      {teams.data && teams.data.pagination.totalPages > 1 ? (
+      {teams.data ? (
         <Pagination
-          page={teams.data.pagination.page}
-          totalPages={teams.data.pagination.totalPages}
-          hasNextPage={teams.data.pagination.hasNextPage}
-          hasPreviousPage={teams.data.pagination.hasPreviousPage}
+          pagination={teams.data.pagination}
           onPageChange={(page) => setParams((current) => replaceParam(current, 'page', String(page), false))}
         />
       ) : null}

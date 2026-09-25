@@ -89,15 +89,7 @@ export function CommentList({ taskId }: { taskId: string }) {
           })}
         </ul>
       )}
-      {pagination && pagination.totalPages > 1 ? (
-        <Pagination
-          page={pagination.page}
-          totalPages={pagination.totalPages}
-          hasNextPage={pagination.hasNextPage}
-          hasPreviousPage={pagination.hasPreviousPage}
-          onPageChange={setPage}
-        />
-      ) : null}
+      {pagination ? <Pagination pagination={pagination} onPageChange={setPage} /> : null}
       <Modal
         open={Boolean(editing)}
         title="Edit comment"
