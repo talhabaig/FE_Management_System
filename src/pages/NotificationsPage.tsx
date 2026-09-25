@@ -100,12 +100,9 @@ export function NotificationsPage() {
           ))}
         </ul>
       ) : null}
-      {notifications.data && notifications.data.pagination.totalPages > 1 ? (
+      {notifications.data ? (
         <Pagination
-          page={notifications.data.pagination.page}
-          totalPages={notifications.data.pagination.totalPages}
-          hasNextPage={notifications.data.pagination.hasNextPage}
-          hasPreviousPage={notifications.data.pagination.hasPreviousPage}
+          pagination={notifications.data.pagination}
           onPageChange={(page) => setParams((current) => replaceParam(current, 'page', String(page), false))}
         />
       ) : null}

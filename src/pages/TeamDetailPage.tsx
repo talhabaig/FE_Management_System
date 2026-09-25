@@ -166,14 +166,8 @@ export function TeamDetailPage() {
             </table>
           </div>
         ) : null}
-        {members.data && members.data.pagination.totalPages > 1 ? (
-          <Pagination
-            page={members.data.pagination.page}
-            totalPages={members.data.pagination.totalPages}
-            hasNextPage={members.data.pagination.hasNextPage}
-            hasPreviousPage={members.data.pagination.hasPreviousPage}
-            onPageChange={setMemberPage}
-          />
+        {members.data ? (
+          <Pagination pagination={members.data.pagination} onPageChange={setMemberPage} />
         ) : null}
         {manageable ? (
           <div className="max-w-xl rounded-2xl border border-sand bg-card p-5 shadow-card">

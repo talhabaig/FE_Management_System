@@ -92,12 +92,9 @@ export function UsersPage() {
           </table>
         </div>
       ) : null}
-      {users.data && users.data.pagination.totalPages > 1 ? (
+      {users.data ? (
         <Pagination
-          page={users.data.pagination.page}
-          totalPages={users.data.pagination.totalPages}
-          hasNextPage={users.data.pagination.hasNextPage}
-          hasPreviousPage={users.data.pagination.hasPreviousPage}
+          pagination={users.data.pagination}
           onPageChange={(page) => setParams((current) => replaceParam(current, 'page', String(page), false))}
         />
       ) : null}

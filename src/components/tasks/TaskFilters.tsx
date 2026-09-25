@@ -39,7 +39,7 @@ export function TaskFilters({
 }: TaskFiltersProps) {
   return (
     <div className="rounded-2xl border border-sand bg-card p-4 shadow-card">
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <TextField
           label="Search"
           name="search"
