@@ -22,6 +22,9 @@ function pageItems(current: number, totalPages: number): Array<number | 'ellipsi
   const items: Array<number | 'ellipsis'> = [];
   for (let index = 0; index < sorted.length; index += 1) {
     const page = sorted[index];
+    if (page == null) {
+      continue;
+    }
     const previous = sorted[index - 1];
     if (previous != null && page - previous > 1) {
       items.push('ellipsis');
